@@ -6,6 +6,8 @@ import {
   type MockMember,
 } from "@/lib/mock-members";
 
+import VotingSession from "@/components/voting/VotingSession";
+
 type CheckInStage = "lookup" | "member-found" | "checked-in";
 
 export default function MemberLookupForm() {
@@ -47,42 +49,44 @@ export default function MemberLookupForm() {
     setStage("lookup");
   }
 
-  if (stage === "checked-in" && member) {
-    return (
-      <section className="status-card" aria-live="polite">
-        <div className="status-icon">✓</div>
+    if (stage === "checked-in" && member) {
+        if (member.eligible) {
+            return (
+            <VotingSession
+                memberName={member.firstName}
+                onExit={handleReset}
+            />
+            );
+        }
 
-        <p className="eyebrow">Check-in complete</p>
-        <h2>You&apos;re checked in</h2>
+        return (
+            <section className="status-card" aria-live="polite">
+            <div className="status-icon">✓</div>
 
-        <p>
-          Welcome, {member.firstName}. Your attendance has been recorded.
-        </p>
+            <p className="eyebrow">Check-in complete</p>
+            <h2>You are checked in</h2>
 
-        {member.eligible ? (
-          <div className="eligibility-message eligible">
-            <strong>Eligible to vote</strong>
-            <span>Wait here for the next position to open.</span>
-          </div>
-        ) : (
-          <div className="eligibility-message ineligible">
-            <strong>Not eligible to vote</strong>
-            <span>
-              You are counted in attendance but cannot vote in this election.
-            </span>
-          </div>
-        )}
+            <p>
+                Welcome, {member.firstName}. Your attendance has been recorded.
+            </p>
 
-        <button
-          className="secondary-button"
-          type="button"
-          onClick={handleReset}
-        >
-          Return to member lookup
-        </button>
-      </section>
-    );
-  }
+            <div className="eligibility-message ineligible">
+                <strong>Not eligible to vote</strong>
+                <span>
+                You are counted in attendance but cannot vote in this election.
+                </span>
+            </div>
+
+            <button
+                className="secondary-button"
+                type="button"
+                onClick={handleReset}
+            >
+                Return to member lookup
+            </button>
+            </section>
+        );
+    }
 
   if (stage === "member-found" && member) {
     return (
@@ -168,7 +172,7 @@ export default function MemberLookupForm() {
         name="email"
         type="email"
         autoComplete="email"
-        placeholder="name@student.monash.edu"
+        placeholder="user0000@student.monash.edu"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
         required
