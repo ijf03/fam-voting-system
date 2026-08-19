@@ -321,6 +321,197 @@
   white-space: nowrap;
 }
 
+.admin-dashboard {
+  width: min(1100px, 100%);
+  margin: 64px auto 0;
+}
+
+.admin-heading,
+.section-heading,
+.quorum-heading,
+.position-card,
+.position-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-heading h1 {
+  margin: 6px 0;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+.demo-badge,
+.position-status,
+.quorum-status {
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.demo-badge {
+  background: #edf0ea;
+  color: #596057;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 36px;
+}
+
+.metric-card,
+.quorum-card,
+.positions-section {
+  border: 1px solid #dfe3dc;
+  border-radius: 18px;
+  background: white;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px;
+}
+
+.metric-card span {
+  color: #626a60;
+}
+
+.metric-card strong {
+  font-size: 2rem;
+}
+
+.quorum-card {
+  margin-top: 16px;
+  padding: 24px;
+}
+
+.quorum-heading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quorum-heading strong {
+  font-size: 1.4rem;
+}
+
+.quorum-status.reached {
+  background: #edf5e7;
+  color: #3f612b;
+}
+
+.quorum-status.not-reached {
+  background: #fff3df;
+  color: #805617;
+}
+
+.quorum-progress {
+  height: 12px;
+  margin-top: 20px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e6e9e3;
+}
+
+.quorum-progress div {
+  height: 100%;
+  border-radius: inherit;
+  background: #65712f;
+}
+
+.positions-section {
+  margin-top: 24px;
+  padding: 24px;
+}
+
+.section-heading {
+  margin-bottom: 20px;
+}
+
+.section-heading h2 {
+  margin-top: 4px;
+}
+
+.position-list {
+  display: grid;
+  gap: 12px;
+}
+
+.position-card {
+  padding: 18px;
+  border: 1px solid #e1e5df;
+  border-radius: 12px;
+}
+
+.position-card h3 {
+  margin-bottom: 4px;
+}
+
+.position-card p {
+  color: #626a60;
+}
+
+.position-status.ready {
+  background: #edf5e7;
+  color: #3f612b;
+}
+
+.position-status.draft {
+  background: #edf0ea;
+  color: #596057;
+}
+
+.position-status.open {
+  background: #e8f1ff;
+  color: #28578f;
+}
+
+.position-status.closed {
+  background: #f0eafa;
+  color: #64458d;
+}
+
+.compact-button {
+  width: auto;
+  margin-top: 0;
+  padding: 10px 14px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 760px) {
+  .admin-dashboard {
+    margin-top: 40px;
+  }
+
+  .admin-heading,
+  .section-heading {
+    align-items: flex-start;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .position-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .position-actions {
+    width: 100%;
+  }
+}
+
 @media (max-width: 760px) {
   .app-header {
     align-items: flex-start;

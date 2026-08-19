@@ -49,44 +49,42 @@ export default function MemberLookupForm() {
     setStage("lookup");
   }
 
-    if (stage === "checked-in" && member) {
-        if (member.eligible) {
-            return (
-            <VotingSession
-                memberName={member.firstName}
-                onExit={handleReset}
-            />
-            );
-        }
+  if (stage === "checked-in" && member) {
+    return (
+      <section className="status-card" aria-live="polite">
+        <div className="status-icon">✓</div>
 
-        return (
-            <section className="status-card" aria-live="polite">
-            <div className="status-icon">✓</div>
+        <p className="eyebrow">Check-in complete</p>
+        <h2>You&apos;re checked in</h2>
 
-            <p className="eyebrow">Check-in complete</p>
-            <h2>You are checked in</h2>
+        <p>
+          Welcome, {member.firstName}. Your attendance has been recorded.
+        </p>
 
-            <p>
-                Welcome, {member.firstName}. Your attendance has been recorded.
-            </p>
+        {member.eligible ? (
+          <div className="eligibility-message eligible">
+            <strong>Eligible to vote</strong>
+            <span>Wait here for the next position to open.</span>
+          </div>
+        ) : (
+          <div className="eligibility-message ineligible">
+            <strong>Not eligible to vote</strong>
+            <span>
+              You are counted in attendance but cannot vote in this election.
+            </span>
+          </div>
+        )}
 
-            <div className="eligibility-message ineligible">
-                <strong>Not eligible to vote</strong>
-                <span>
-                You are counted in attendance but cannot vote in this election.
-                </span>
-            </div>
-
-            <button
-                className="secondary-button"
-                type="button"
-                onClick={handleReset}
-            >
-                Return to member lookup
-            </button>
-            </section>
-        );
-    }
+        <button
+          className="secondary-button"
+          type="button"
+          onClick={handleReset}
+        >
+          Return to member lookup
+        </button>
+      </section>
+    );
+  }
 
   if (stage === "member-found" && member) {
     return (
@@ -172,7 +170,7 @@ export default function MemberLookupForm() {
         name="email"
         type="email"
         autoComplete="email"
-        placeholder="user0000@student.monash.edu"
+        placeholder="name@student.monash.edu"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
         required
