@@ -129,6 +129,87 @@
   color: #3f5f2b;
 }
 
+.member-details {
+  display: grid;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.member-details div {
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e8e2;
+}
+
+.member-details dt {
+  margin-bottom: 4px;
+  color: #697067;
+  font-size: 0.875rem;
+}
+
+.member-details dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.eligibility-badge {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+}
+
+.eligible {
+  background: #edf5e7;
+  color: #3f612b;
+}
+
+.ineligible {
+  background: #fff3df;
+  color: #805617;
+}
+
+.secondary-button {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border: 1px solid #cdd2ca;
+  border-radius: 10px;
+  background: white;
+  color: #30372d;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.status-card {
+  padding: 32px;
+  border: 1px solid #dfe3dc;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 18px 50px rgb(31 36 31 / 8%);
+}
+
+.status-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 24px;
+  place-items: center;
+  border-radius: 50%;
+  background: #65712f;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.eligibility-message {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 24px 0;
+  padding: 16px;
+  border-radius: 12px;
+}
+
 @media (max-width: 760px) {
   .app-header {
     align-items: flex-start;
