@@ -7,10 +7,12 @@ import {
 } from "@/lib/mock-members";
 
 import VotingSession from "@/components/voting/VotingSession";
+import { useAgm } from "@/components/AgmProvider";
 
 type CheckInStage = "lookup" | "member-found" | "checked-in";
 
 export default function MemberLookupForm() {
+  const { checkIn } = useAgm();
   const [studentId, setStudentId] = useState("");
   const [email, setEmail] = useState("");
   const [member, setMember] = useState<MockMember | null>(null);
@@ -38,6 +40,7 @@ export default function MemberLookupForm() {
   }
 
   function handleCheckIn() {
+    if (member) checkIn(member.id, member.eligible);
     setStage("checked-in");
   }
 
@@ -50,6 +53,16 @@ export default function MemberLookupForm() {
   }
 
   if (stage === "checked-in" && member) {
+    if (member.eligible) {
+      return (
+        <VotingSession
+          memberId={member.id}
+          memberName={member.firstName}
+          onExit={handleReset}
+        />
+      );
+    }
+
     return (
       <section className="status-card" aria-live="polite">
         <div className="status-icon">✓</div>
@@ -61,19 +74,12 @@ export default function MemberLookupForm() {
           Welcome, {member.firstName}. Your attendance has been recorded.
         </p>
 
-        {member.eligible ? (
-          <div className="eligibility-message eligible">
-            <strong>Eligible to vote</strong>
-            <span>Wait here for the next position to open.</span>
-          </div>
-        ) : (
-          <div className="eligibility-message ineligible">
-            <strong>Not eligible to vote</strong>
-            <span>
-              You are counted in attendance but cannot vote in this election.
-            </span>
-          </div>
-        )}
+        <div className="eligibility-message ineligible">
+          <strong>Not eligible to vote</strong>
+          <span>
+            You are counted in attendance but cannot vote in this election.
+          </span>
+        </div>
 
         <button
           className="secondary-button"

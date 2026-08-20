@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import MemberLookupForm from "@/components/member/MemberLookupForm";
 import AdminDashboard from "@/components/admin/AdminDashboard";
+import { AgmProvider } from "@/components/AgmProvider";
 
 type ActiveView = "member" | "admin";
 
@@ -11,6 +12,7 @@ export default function AppShell() {
   const [activeView, setActiveView] = useState<ActiveView>("member");
 
   return (
+    <AgmProvider>
     <main className="app-container">
       <header className="app-header">
         <Image
@@ -61,5 +63,6 @@ export default function AppShell() {
         <AdminDashboard />
       )}
     </main>
+    </AgmProvider>
   );
 }
