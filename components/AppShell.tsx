@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Image from "next/image";
 import MemberLookupForm from "@/components/member/MemberLookupForm";
 import AdminDashboard from "@/components/admin/AdminDashboard";
@@ -10,16 +10,60 @@ type ActiveView = "member" | "admin";
 
 export default function AppShell() {
   const [activeView, setActiveView] = useState<ActiveView>("member");
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
+  const [submittingPassword, setSubmittingPassword] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/session", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((result: { authenticated?: boolean }) => setAdminUnlocked(result.authenticated === true))
+      .catch(() => setAdminUnlocked(false))
+      .finally(() => setCheckingAdmin(false));
+  }, []);
+
+  async function handleAdminLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPasswordError("");
+    setSubmittingPassword(true);
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const result = (await response.json()) as { error?: string };
+      if (!response.ok) {
+        setPasswordError(result.error || "Unable to unlock the admin portal.");
+        return;
+      }
+      setAdminUnlocked(true);
+      setPassword("");
+    } catch {
+      setPasswordError("Unable to contact the server. Please try again.");
+    } finally {
+      setSubmittingPassword(false);
+    }
+  }
+
+  async function handleAdminLock() {
+    await fetch("/api/admin/logout", { method: "POST" }).catch(() => undefined);
+    setAdminUnlocked(false);
+    setPassword("");
+  }
 
   return (
     <AgmProvider>
     <main className="app-container">
       <header className="app-header">
         <Image
-          src="/fam-logo.png"
+          className="brand-logo"
+          src="/fam-logo.jpg"
           alt="Filipino Association Monash"
-          width={150}
-          height={70}
+          width={112}
+          height={112}
           priority
         />
 
@@ -59,8 +103,34 @@ export default function AppShell() {
 
           <MemberLookupForm />
         </section>
+      ) : checkingAdmin ? (
+        <section className="admin-login-section"><p>Checking admin access...</p></section>
+      ) : adminUnlocked ? (
+        <AdminDashboard onLock={handleAdminLock} />
       ) : (
-        <AdminDashboard />
+        <section className="admin-login-section">
+          <form className="admin-login-card" onSubmit={handleAdminLogin}>
+            <div className="lock-mark" aria-hidden="true">FAM</div>
+            <p className="eyebrow">Committee access</p>
+            <h1>Admin portal</h1>
+            <p>Enter the committee password to manage attendance and voting.</p>
+            <label htmlFor="admin-password">Admin password</label>
+            <input
+              id="admin-password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoFocus
+              required
+            />
+            {passwordError && <p className="form-message error-message" role="alert">{passwordError}</p>}
+            <button className="primary-button" type="submit" disabled={submittingPassword}>
+              {submittingPassword ? "Checking..." : "Unlock admin portal"}
+            </button>
+            <p className="login-help">Access expires automatically after 12 hours.</p>
+          </form>
+        </section>
       )}
     </main>
     </AgmProvider>

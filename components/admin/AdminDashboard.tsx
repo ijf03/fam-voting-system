@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useAgm } from "@/components/AgmProvider";
+import { readMemberWorkbook } from "@/lib/xlsx-member-import";
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ onLock }: { onLock: () => void }) {
   const {
     state,
     addPosition,
@@ -12,12 +13,19 @@ export default function AdminDashboard() {
     closePosition,
     setPaused,
     resetDemo,
+    importMemberCounts,
+    clearVotes,
+    clearNominees,
+    clearPositions,
   } = useAgm();
   const [newPosition, setNewPosition] = useState("");
   const [nomineeNames, setNomineeNames] = useState<Record<string, string>>({});
   const [showAddPosition, setShowAddPosition] = useState(false);
-  const totalMembers = 281;
-  const eligibleMembers = 175;
+  const [importStatus, setImportStatus] = useState("");
+  const [importError, setImportError] = useState("");
+  const [importing, setImporting] = useState(false);
+  const totalMembers = state.memberImport.totalMembers;
+  const eligibleMembers = state.memberImport.eligibleMembers;
   const checkedIn = 91 + state.checkIns.length;
   const eligibleCheckedIn = 72 + state.eligibleCheckIns.length;
   const quorumRequired = 24;
@@ -49,6 +57,9 @@ export default function AdminDashboard() {
             {state.paused ? "Resume voting" : "Pause all voting"}
           </button>
           <span className="demo-badge">Local live demo</span>
+          <button className="secondary-button compact-button" type="button" onClick={onLock}>
+            Lock admin
+          </button>
         </div>
       </div>
 
@@ -73,6 +84,32 @@ export default function AdminDashboard() {
           <strong>{eligibleCheckedIn}</strong>
         </article>
       </div>
+
+      <article className="member-import-card">
+        <div>
+          <p className="eyebrow">Membership source</p>
+          <h2>Import member totals</h2>
+          <p>
+            Choose the current MSA member export. The file is read in this browser only;
+            names, IDs, and emails are not stored by this demo.
+          </p>
+          <p className="import-source">
+            <strong>Current source:</strong> {state.memberImport.sourceFile}<br />
+            <span>Eligibility rule: {state.memberImport.rule}</span>
+          </p>
+        </div>
+        <label className="upload-button">
+          {importing ? "Reading workbook..." : "Choose Excel file"}
+          <input
+            type="file"
+            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            onChange={handleWorkbook}
+            disabled={importing}
+          />
+        </label>
+        {importStatus && <p className="form-message success-message" role="status">{importStatus}</p>}
+        {importError && <p className="form-message error-message" role="alert">{importError}</p>}
+      </article>
 
       <article className="quorum-card">
         <div className="quorum-heading">
@@ -192,7 +229,47 @@ export default function AdminDashboard() {
           )})}
         </div>
       </div>
-      <button className="text-button" type="button" onClick={resetDemo}>Reset local demo data</button>
+      <section className="danger-zone">
+        <div>
+          <p className="eyebrow">Data controls</p>
+          <h2>Clear meeting data</h2>
+          <p>These actions affect this browser&apos;s local demo data.</p>
+        </div>
+        <div className="danger-actions">
+          <button className="secondary-button compact-button" type="button" onClick={() => {
+            if (window.confirm("Clear all recorded votes? This cannot be undone.")) clearVotes();
+          }}>Clear votes</button>
+          <button className="secondary-button compact-button" type="button" onClick={() => {
+            if (window.confirm("Remove every nominee? Recorded votes will also be cleared.")) clearNominees();
+          }}>Clear nominees</button>
+          <button className="danger-button compact-button" type="button" onClick={() => {
+            if (window.confirm("Remove every position, nominee, and vote? This cannot be undone.")) clearPositions();
+          }}>Remove all positions</button>
+          <button className="text-button" type="button" onClick={() => {
+            if (window.confirm("Restore all original demo data and counts?")) resetDemo();
+          }}>Restore demo defaults</button>
+        </div>
+      </section>
     </section>
   );
+
+  async function handleWorkbook(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    setImportError("");
+    setImportStatus("");
+    try {
+      const summary = await readMemberWorkbook(file);
+      importMemberCounts(summary);
+      setImportStatus(
+        `Imported ${summary.totalMembers} members; ${summary.eligibleMembers} eligible.`,
+      );
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : "Unable to read that workbook.");
+    } finally {
+      setImporting(false);
+      event.target.value = "";
+    }
+  }
 }

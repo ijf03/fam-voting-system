@@ -27,6 +27,13 @@ type MeetingState = {
   participation: string[];
   tallies: Record<string, Record<string, number>>;
   positions: Position[];
+  memberImport: {
+    totalMembers: number;
+    eligibleMembers: number;
+    sourceFile: string;
+    rule: string;
+    importedAt: string | null;
+  };
 };
 
 type AgmContextValue = {
@@ -41,6 +48,15 @@ type AgmContextValue = {
   closePosition: (positionId: string) => void;
   setPaused: (paused: boolean) => void;
   resetDemo: () => void;
+  importMemberCounts: (summary: {
+    totalMembers: number;
+    eligibleMembers: number;
+    sourceFile: string;
+    rule: string;
+  }) => void;
+  clearVotes: () => void;
+  clearNominees: () => void;
+  clearPositions: () => void;
 };
 
 const STORAGE_KEY = "fam-agm-2026-state-v2";
@@ -51,6 +67,13 @@ const initialState: MeetingState = {
   eligibleCheckIns: [],
   participation: [],
   tallies: {},
+  memberImport: {
+    totalMembers: 281,
+    eligibleMembers: 175,
+    sourceFile: "Demo defaults - import a workbook to replace",
+    rule: "Clayton campus and enrolled status",
+    importedAt: null,
+  },
   positions: [
     {
       id: "president",
@@ -103,7 +126,12 @@ export function AgmProvider({ children }: { children: ReactNode }) {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        setState(JSON.parse(saved) as MeetingState);
+        const parsed = JSON.parse(saved) as Partial<MeetingState>;
+        setState({
+          ...initialState,
+          ...parsed,
+          memberImport: parsed.memberImport ?? initialState.memberImport,
+        });
       } catch {
         window.localStorage.removeItem(STORAGE_KEY);
       }
@@ -257,6 +285,44 @@ export function AgmProvider({ children }: { children: ReactNode }) {
     setState(initialState);
   }, []);
 
+  const importMemberCounts = useCallback(
+    (summary: { totalMembers: number; eligibleMembers: number; sourceFile: string; rule: string }) =>
+      update((current) => ({
+        ...current,
+        memberImport: { ...summary, importedAt: new Date().toISOString() },
+      })),
+    [update],
+  );
+
+  const clearVotes = useCallback(
+    () => update((current) => ({ ...current, participation: [], tallies: {} })),
+    [update],
+  );
+
+  const clearNominees = useCallback(
+    () => update((current) => ({
+      ...current,
+      participation: [],
+      tallies: {},
+      positions: current.positions.map((position) => ({
+        ...position,
+        nominees: [],
+        status: "draft",
+      })),
+    })),
+    [update],
+  );
+
+  const clearPositions = useCallback(
+    () => update((current) => ({
+      ...current,
+      participation: [],
+      tallies: {},
+      positions: [],
+    })),
+    [update],
+  );
+
   const activePosition = state.positions.find((position) => position.status === "open");
   const value = useMemo(
     () => ({
@@ -271,6 +337,10 @@ export function AgmProvider({ children }: { children: ReactNode }) {
       closePosition,
       setPaused,
       resetDemo,
+      importMemberCounts,
+      clearVotes,
+      clearNominees,
+      clearPositions,
     }),
     [
       state,
@@ -284,6 +354,10 @@ export function AgmProvider({ children }: { children: ReactNode }) {
       closePosition,
       setPaused,
       resetDemo,
+      importMemberCounts,
+      clearVotes,
+      clearNominees,
+      clearPositions,
     ],
   );
 
